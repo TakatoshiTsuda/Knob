@@ -1,0 +1,6 @@
+D:\ADAM Files\UNIVERSITAS PARAHYANGAN\SKRIPSI\Project\Knob\Knob\bin\Debug\Knob.exe.config
+D:\ADAM Files\UNIVERSITAS PARAHYANGAN\SKRIPSI\Project\Knob\Knob\bin\Debug\Knob.exe
+D:\ADAM Files\UNIVERSITAS PARAHYANGAN\SKRIPSI\Project\Knob\Knob\bin\Debug\Knob.pdb
+D:\ADAM Files\UNIVERSITAS PARAHYANGAN\SKRIPSI\Project\Knob\Knob\obj\Debug\Knob.csprojResolveAssemblyReference.cache
+D:\ADAM Files\UNIVERSITAS PARAHYANGAN\SKRIPSI\Project\Knob\Knob\obj\Debug\Knob.exe
+D:\ADAM Files\UNIVERSITAS PARAHYANGAN\SKRIPSI\Project\Knob\Knob\obj\Debug\Knob.pdb
