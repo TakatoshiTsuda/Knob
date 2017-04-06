@@ -11,18 +11,32 @@ namespace Knob
     {
         NktSpyMgr _spyMgr = new NktSpyMgr();
         NktHooksEnum hooks;
+        string[] calls;
         public HookEngine()
         {
             _spyMgr.Initialize();
             hooks = _spyMgr.CreateHooksCollection();
+            initializeCall();
         }
-
+        private void initializeCall()
+        {
+            string dir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            calls = System.IO.File.ReadAllLines(dir+"systemcall.txt");
+            for (int i = 0;i<calls.Length;i++)
+            {
+                createHook(calls[i]);
+            }
+        }
         private void createHook(String call)
         {
             NktHook hook = _spyMgr.CreateHook(call,(int)eNktHookFlags.flgOnlyPreCall);
             hooks.Add(hook);
         }
-        public void SetHook()
+        public void setHook(string processName)
+        {
+
+        }
+        public void SetHookOld()
         {
             Boolean process = false;
             NktProcess _process = null;
