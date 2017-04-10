@@ -3,39 +3,43 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections;
 using Nektra.Deviare2;
 
 namespace Knob
 {
     public class HookEngine
     {
-        NktSpyMgr _spyMgr = new NktSpyMgr();
         NktHooksEnum hooks;
         string[] calls;
         public HookEngine()
         {
-            _spyMgr.Initialize();
-            hooks = _spyMgr.CreateHooksCollection();
+            hooks = GlobalManager.spyMgr.CreateHooksCollection();
             initializeCall();
         }
         private void initializeCall()
         {
             string dir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            calls = System.IO.File.ReadAllLines(dir+"systemcall.txt");
-            for (int i = 0;i<calls.Length;i++)
+            calls = System.IO.File.ReadAllLines(dir + "/systemcall.txt");
+            for (int i = 0; i < calls.Length; i++)
             {
+                Console.WriteLine(calls[i]);
                 createHook(calls[i]);
             }
+            hooks.Hook(true);
         }
         private void createHook(String call)
         {
-            NktHook hook = _spyMgr.CreateHook(call,(int)eNktHookFlags.flgOnlyPreCall);
+            NktHook hook = GlobalManager.spyMgr.CreateHook(call, (int)eNktHookFlags.flgOnlyPreCall);
+            hook.OnFunctionCalled += OnFunctionCalled;
             hooks.Add(hook);
         }
-        public void setHook(string processName)
-        {
 
+        public void setHook(NktProcess process)
+        {
+            hooks.Attach(process, true);
         }
+
         public void SetHookOld()
         {
             Boolean process = false;
@@ -55,8 +59,8 @@ namespace Knob
 
                 }
             }
-            NktHook hook = _spyMgr.CreateHook("kernel32.dll!CreateFileW", (int)(eNktHookFlags.flgOnlyPreCall));
-            NktHooksEnum hooks = _spyMgr.CreateHooksCollection();
+            NktHook hook = GlobalManager.spyMgr.CreateHook("kernel32.dll!CreateFileW", (int)(eNktHookFlags.flgOnlyPreCall));
+            NktHooksEnum hooks = GlobalManager.spyMgr.CreateHooksCollection();
             hooks.Add(hook);
             hook.OnFunctionCalled += OnFunctionCalled;
             hook.Hook(true);
@@ -64,7 +68,7 @@ namespace Knob
         }
         NktProcess GetProcess(string proccessName)
         {
-            NktProcessesEnum enumProcess = _spyMgr.Processes();
+            NktProcessesEnum enumProcess = GlobalManager.spyMgr.Processes();
             NktProcess tempProcess = enumProcess.First();
             while (tempProcess != null)
             {
@@ -76,7 +80,12 @@ namespace Knob
             }
             return null;
         }
+
         void OnFunctionCalled(INktHook hook, INktProcess proc, INktHookCallInfo hookCallInfo)
+        {
+
+        }
+        void OnFunctionCalledOld(INktHook hook, INktProcess proc, INktHookCallInfo hookCallInfo)
         {
             string strCreateFile = "CreateFile(\"";
 

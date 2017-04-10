@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DllRegister.cs" />
+    <Compile Include="GlobalManager.cs" />
     <Compile Include="HookEngine.cs" />
     <Compile Include="ProcessEngine.cs" />
     <Compile Include="Program.cs" />

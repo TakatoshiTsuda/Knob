@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
-
+using Nektra.Deviare2;
 namespace Knob
 {
     class Program
@@ -17,9 +17,10 @@ namespace Knob
             DllRegister dllreg = new DllRegister();
             string dll = (System.IO.Path.GetFullPath("DeviareCOM64.dll"));
             dllreg.Register_Dlls(dll);
+            GlobalManager gm = new GlobalManager(); 
             HookEngine he = new HookEngine();
             //ProcessEngine pe = new ProcessEngine();
-            he.SetHook();
+            //he.SetHook();
             Boolean temp = true;
             while (temp != false)
             {
