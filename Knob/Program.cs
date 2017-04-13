@@ -13,7 +13,6 @@ namespace Knob
         [MTAThread]
         static void Main(string[] args)
         {
-            
             DllRegister dllreg = new DllRegister();
             string dll = (System.IO.Path.GetFullPath("DeviareCOM64.dll"));
             dllreg.Register_Dlls(dll);

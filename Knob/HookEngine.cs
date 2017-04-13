@@ -46,7 +46,7 @@ namespace Knob
             NktProcess _process = null;
             while (process == false)
             {
-                _process = GetProcess("notepad.exe");
+                //_process = GetProcess("notepad.exe");
                 if (_process != null)
                 {
                     process = true;
@@ -66,24 +66,10 @@ namespace Knob
             hook.Hook(true);
             hook.Attach(_process, true);
         }
-        NktProcess GetProcess(string proccessName)
-        {
-            NktProcessesEnum enumProcess = GlobalManager.spyMgr.Processes();
-            NktProcess tempProcess = enumProcess.First();
-            while (tempProcess != null)
-            {
-                if (tempProcess.Name.Equals(proccessName, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    return tempProcess;
-                }
-                tempProcess = enumProcess.Next();
-            }
-            return null;
-        }
 
         void OnFunctionCalled(INktHook hook, INktProcess proc, INktHookCallInfo hookCallInfo)
         {
-
+            string 
         }
         void OnFunctionCalledOld(INktHook hook, INktProcess proc, INktHookCallInfo hookCallInfo)
         {

@@ -11,12 +11,14 @@ namespace Knob
     {
         public static NktSpyMgr spyMgr;
         public static HookEngine hookEngine;
+        private Dictionary<string, ProcessCall> processList;
 
         public GlobalManager()
         {
             spyMgr = new NktSpyMgr();
             spyMgr.Initialize();
             hookEngine = new HookEngine();
+            processList = new Dictionary<string, ProcessCall>();
         }
 
     }

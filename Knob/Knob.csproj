@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProcessCall.cs" />
     <Compile Include="DllRegister.cs" />
     <Compile Include="GlobalManager.cs" />
     <Compile Include="HookEngine.cs" />
