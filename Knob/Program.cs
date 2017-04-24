@@ -18,7 +18,7 @@ namespace Knob
             dllreg.Register_Dlls(dll);
             GlobalManager gm = new GlobalManager(); 
             HookEngine he = new HookEngine();
-            //ProcessEngine pe = new ProcessEngine();
+            ProcessEngine pe = new ProcessEngine();
             //he.SetHook();
             Boolean temp = true;
             while (temp != false)

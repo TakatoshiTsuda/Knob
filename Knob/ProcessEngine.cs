@@ -11,9 +11,12 @@ namespace Knob
 {
     class ProcessEngine
     {
+        string sys = "SYSTEM";
+        string ls = "LOCAL SERVICE";
+        string ns = "NETWORK SERVICE";
         ManagementEventWatcher processStartEvent = new ManagementEventWatcher("SELECT * FROM Win32_ProcessStartTrace");
         ManagementEventWatcher processStopEvent = new ManagementEventWatcher("SELECT * FROM Win32_ProcessStopTrace");
-        ProcessEngine()
+        public ProcessEngine()
         {
             initialize();
             initializeProcessDetector();
@@ -24,14 +27,27 @@ namespace Knob
             NktProcess temp = processes.First();
             while (temp != null)
             {
-                filterProcess(temp);
+                filterProcess(1, temp);
+                temp = processes.Next();
             }
         }
-        void filterProcess(NktProcess proc)
+        void filterProcess(int status, NktProcess proc)
         {
-            if (!proc.UserName.Equals("SYSTEM") || !proc.UserName.Equals("LOCAL SERVICE") || !proc.UserName.Equals("NETWORK SERVICE"))
+            if (proc.UserName.Equals(sys, StringComparison.OrdinalIgnoreCase) || proc.UserName.Equals(ls, StringComparison.OrdinalIgnoreCase) || proc.UserName.Equals(ns, StringComparison.OrdinalIgnoreCase))
             {
-                GlobalManager.hookEngine.setHook(proc);
+                Debug.WriteLine("Normal Things");
+            }
+            else
+            {
+                if (status == 1)
+                {
+                    GlobalManager.hookEngine.setHook(proc);
+                }
+                else
+                {
+                    GlobalManager.removeProc(proc.Name);
+                }
+                
             }
         }
         NktProcess GetProcess(string proccessName)
@@ -52,22 +68,22 @@ namespace Knob
         {
             processStartEvent.EventArrived += new EventArrivedEventHandler(processStartEvent_EventArrived);
             processStartEvent.Start();
-            //processStopEvent.EventArrived += new EventArrivedEventHandler(processStopEvent_EventArrived);
-            //processStopEvent.Start();
+            processStopEvent.EventArrived += new EventArrivedEventHandler(processStopEvent_EventArrived);
+            processStopEvent.Start();
         }
         void processStartEvent_EventArrived(object sender, EventArrivedEventArgs e)
         {
             string processName = e.NewEvent.Properties["ProcessName"].Value.ToString();
             //string processID = Convert.ToInt32(e.NewEvent.Properties["ProcessID"].Value).ToString();
             NktProcess proc = GetProcess(processName);
-            filterProcess(proc);            
+            filterProcess(1, proc);            
         }
 
-        //void processStopEvent_EventArrived(object sender, EventArrivedEventArgs e)
-        //{
-        //    string processName = e.NewEvent.Properties["ProcessName"].Value.ToString();
-        //    string processID = Convert.ToInt32(e.NewEvent.Properties["ProcessID"].Value).ToString();
-        //    Console.WriteLine("Process stopped. Name: " + processName + " | ID: " + processID);
-        //}
+        void processStopEvent_EventArrived(object sender, EventArrivedEventArgs e)
+        {
+            string processName = e.NewEvent.Properties["ProcessName"].Value.ToString();
+            NktProcess proc = GetProcess(processName);
+            filterProcess(2, proc);
+        }
     }
 }

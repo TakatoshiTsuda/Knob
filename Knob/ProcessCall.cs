@@ -22,7 +22,7 @@ namespace Knob
         private LinkedList<string> deleteFileLog;
         private bool alert;
 
-        ProcessCall(string processName)
+        public ProcessCall(string processName)
         {
             this.processName = processName;
             dllInjection = new int[4];

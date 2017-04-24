@@ -11,7 +11,7 @@ namespace Knob
     {
         public static NktSpyMgr spyMgr;
         public static HookEngine hookEngine;
-        private Dictionary<string, ProcessCall> processList;
+        private static Dictionary<string, ProcessCall> processList;
 
         public GlobalManager()
         {
@@ -19,6 +19,20 @@ namespace Knob
             spyMgr.Initialize();
             hookEngine = new HookEngine();
             processList = new Dictionary<string, ProcessCall>();
+        }
+        public static void addProc(string name, ProcessCall proc)
+        {
+            processList.Add(name, proc);
+        }
+        public static void removeProc(string name)
+        {
+            processList.Remove(name);
+        }
+        public static ProcessCall returnProcess(string name)
+        {
+            ProcessCall pc;
+            processList.TryGetValue(name, out pc);
+            return pc;
         }
 
     }

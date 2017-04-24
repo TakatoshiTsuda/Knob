@@ -10,21 +10,56 @@ namespace Knob
 {
     public class HookEngine
     {
-        NktHooksEnum hooks;
-        string[] calls;
+        private NktHooksEnum hooks;
+        Dictionary<string,string> calls;
+        Dictionary<string,int> callsIdx;
+        private string dir;
         public HookEngine()
         {
             hooks = GlobalManager.spyMgr.CreateHooksCollection();
+            calls = new Dictionary<string, string>();
+            callsIdx = new Dictionary<string, int>();
             initializeCall();
+
         }
         private void initializeCall()
         {
-            string dir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            calls = System.IO.File.ReadAllLines(dir + "/systemcall.txt");
+            dir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string[] calls = System.IO.File.ReadAllLines(dir + "/systemcall.txt");
+            string type = "";
+            int idx = 0;
             for (int i = 0; i < calls.Length; i++)
             {
                 Console.WriteLine(calls[i]);
                 createHook(calls[i]);
+                if (i == 0)
+                {
+                    type = "dll";
+                    idx = 0;
+                }
+                else if (i == 4)
+                {
+                    type = "iat";
+                    idx = 0;
+                }
+                else if (i == 9)
+                {
+                    type = "antidebug";
+                    idx = 0;
+                }
+                else if (i == 12)
+                {
+                    type = "screencap";
+                    idx = 0;
+                }
+                else if (i == 18)
+                {
+                    type = "logging";
+                    idx = 0;
+                }
+                this.calls.Add(calls[i].Substring(13),type);
+                this.callsIdx.Add(calls[i].Substring(13),idx);
+                idx++;
             }
             hooks.Hook(true);
         }
@@ -38,6 +73,8 @@ namespace Knob
         public void setHook(NktProcess process)
         {
             hooks.Attach(process, true);
+            ProcessCall temp = new ProcessCall(process.Name);
+            GlobalManager.addProc(process.Name,temp);
         }
 
         public void SetHookOld()
@@ -69,7 +106,15 @@ namespace Knob
 
         void OnFunctionCalled(INktHook hook, INktProcess proc, INktHookCallInfo hookCallInfo)
         {
-            string 
+            string name = proc.Name;
+            string hookname = hook.FunctionName;
+            ProcessCall pc = GlobalManager.returnProcess(name);
+            string type = calls[hookname];
+            int idx = callsIdx[hookname];
+            pc.setFlag(type,idx);
+            
+
+            System.Diagnostics.Debug.WriteLine(name+hookname);
         }
         void OnFunctionCalledOld(INktHook hook, INktProcess proc, INktHookCallInfo hookCallInfo)
         {
