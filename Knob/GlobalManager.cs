@@ -11,27 +11,33 @@ namespace Knob
     {
         public static NktSpyMgr spyMgr;
         public static HookEngine hookEngine;
-        private static Dictionary<string, ProcessCall> processList;
+        private static Dictionary<int, ProcessCall> processList;
 
         public GlobalManager()
         {
             spyMgr = new NktSpyMgr();
             spyMgr.Initialize();
             hookEngine = new HookEngine();
-            processList = new Dictionary<string, ProcessCall>();
+            processList = new Dictionary<int, ProcessCall>();
         }
-        public static void addProc(string name, ProcessCall proc)
+        public static void addProc(int pid, ProcessCall proc)
         {
-            processList.Add(name, proc);
+            processList.Add(pid, proc);
+            Console.WriteLine("Process Added!" + proc.getName());
         }
-        public static void removeProc(string name)
+        public static void removeProc(int pid)
         {
-            processList.Remove(name);
+            ProcessCall pc = returnProcess(pid);
+            if ( pc != null)
+            {
+                processList.Remove(pid);
+                Console.WriteLine("Process Removed! " + pc.getName());
+            }            
         }
-        public static ProcessCall returnProcess(string name)
+        public static ProcessCall returnProcess(int pid)
         {
             ProcessCall pc;
-            processList.TryGetValue(name, out pc);
+            processList.TryGetValue(pid, out pc);
             return pc;
         }
 

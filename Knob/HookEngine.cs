@@ -20,7 +20,6 @@ namespace Knob
             calls = new Dictionary<string, string>();
             callsIdx = new Dictionary<string, int>();
             initializeCall();
-
         }
         private void initializeCall()
         {
@@ -57,13 +56,15 @@ namespace Knob
                     type = "logging";
                     idx = 0;
                 }
-                this.calls.Add(calls[i].Substring(13),type);
-                this.callsIdx.Add(calls[i].Substring(13),idx);
+                //this.calls.Add(calls[i].Substring(13),type);
+                //callsIdx.Add(calls[i].Substring(13),idx);
+                this.calls.Add(calls[i], type);
+                callsIdx.Add(calls[i], idx);
                 idx++;
             }
             hooks.Hook(true);
         }
-        private void createHook(String call)
+        private void createHook(string call)
         {
             NktHook hook = GlobalManager.spyMgr.CreateHook(call, (int)eNktHookFlags.flgOnlyPreCall);
             hook.OnFunctionCalled += OnFunctionCalled;
@@ -73,8 +74,17 @@ namespace Knob
         public void setHook(NktProcess process)
         {
             hooks.Attach(process, true);
-            ProcessCall temp = new ProcessCall(process.Name);
-            GlobalManager.addProc(process.Name,temp);
+            ProcessCall temp = new ProcessCall(process.Name, process.Id);
+            GlobalManager.addProc(process.Id,temp);
+            //below used for debugging purposes
+            //sometimes hooked succesfully but the call is not detected
+            //maybe bug? or suddenly the hook is lost
+            //NktHook hk = hooks.First();
+            //while (hk != null)
+            //{
+            //    Console.WriteLine(hk.FunctionName);
+            //    hk = hooks.Next();
+            //}
         }
 
         public void SetHookOld()
@@ -87,11 +97,11 @@ namespace Knob
                 if (_process != null)
                 {
                     process = true;
-                    Output("Process Started!\n");
+                    //Output("Process Started!\n");
                 }
                 else
                 {
-                    Output("Process not started yet\n");
+                    //Output("Process not started yet\n");
                     System.Threading.Thread.Sleep(5000);
 
                 }
@@ -108,103 +118,265 @@ namespace Knob
         {
             string name = proc.Name;
             string hookname = hook.FunctionName;
-            ProcessCall pc = GlobalManager.returnProcess(name);
+            ProcessCall pc = GlobalManager.returnProcess(proc.Id);
             string type = calls[hookname];
             int idx = callsIdx[hookname];
-            pc.setFlag(type,idx);
-            
-
-            System.Diagnostics.Debug.WriteLine(name+hookname);
-        }
-        void OnFunctionCalledOld(INktHook hook, INktProcess proc, INktHookCallInfo hookCallInfo)
-        {
-            string strCreateFile = "CreateFile(\"";
-
-            INktParamsEnum paramsEnum = hookCallInfo.Params();
-
-            //lpFileName
-            INktParam param = paramsEnum.First();
-            strCreateFile += param.ReadString() + "\", ";
-
-            //dwDesiredAccess
-            param = paramsEnum.Next();
-            if ((param.LongVal & 0x80000000) == 0x80000000)
-                strCreateFile += "GENERIC_READ ";
-            else if ((param.LongVal & 0x40000000) == 0x40000000)
-                strCreateFile += "GENERIC_WRITE ";
-            else if ((param.LongVal & 0x20000000) == 0x20000000)
-                strCreateFile += "GENERIC_EXECUTE ";
-            else if ((param.LongVal & 0x10000000) == 0x10000000)
-                strCreateFile += "GENERIC_ALL ";
-            else
-                strCreateFile += "0";
-            strCreateFile += ", ";
-
-            //dwShareMode
-            param = paramsEnum.Next();
-            if ((param.LongVal & 0x00000001) == 0x00000001)
-                strCreateFile += "FILE_SHARE_READ ";
-            else if ((param.LongVal & 0x00000002) == 0x00000002)
-                strCreateFile += "FILE_SHARE_WRITE ";
-            else if ((param.LongVal & 0x00000004) == 0x00000004)
-                strCreateFile += "FILE_SHARE_DELETE ";
-            else
-                strCreateFile += "0";
-            strCreateFile += ", ";
-
-            //lpSecurityAttributes
-            param = paramsEnum.Next();
-            if (param.PointerVal != IntPtr.Zero)
+            if (type.Equals("logging", StringComparison.OrdinalIgnoreCase))
             {
-                strCreateFile += "SECURITY_ATTRIBUTES(";
-
-                INktParamsEnum paramsEnumStruct = param.Evaluate().Fields();
-                INktParam paramStruct = paramsEnumStruct.First();
-
-                strCreateFile += paramStruct.LongVal.ToString();
-                strCreateFile += ", ";
-
-                paramStruct = paramsEnumStruct.Next();
-                strCreateFile += paramStruct.PointerVal.ToString();
-                strCreateFile += ", ";
-
-                paramStruct = paramsEnumStruct.Next();
-                strCreateFile += paramStruct.LongVal.ToString();
-                strCreateFile += ")";
+                string param = getParam(idx, hookCallInfo) ;
+                if (param != null)
+                {
+                    Console.WriteLine(name + " " + param);
+                    pc.setLog(idx, param);
+                } 
             }
             else
-                strCreateFile += "0";
-            strCreateFile += ", ";
-
-            //dwCreationDisposition
-            param = paramsEnum.Next();
-            if (param.LongVal == 1)
-                strCreateFile += "CREATE_NEW ";
-            else if (param.LongVal == 2)
-                strCreateFile += "CREATE_ALWAYS ";
-            else if (param.LongVal == 3)
-                strCreateFile += "OPEN_EXISTING ";
-            else if (param.LongVal == 4)
-                strCreateFile += "OPEN_ALWAYS ";
-            else if (param.LongVal == 5)
-                strCreateFile += "TRUNCATE_EXISTING ";
-            else
-                strCreateFile += "0";
-            strCreateFile += ", ";
-
-            //dwFlagsAndAttributes
-            strCreateFile += param.LongVal;
-            strCreateFile += ", ";
-
-            //hTemplateFile
-            strCreateFile += param.LongLongVal;
-            strCreateFile += ");\r\n";
-            Output(strCreateFile);
+            {
+                pc.setFlag(type, idx);
+            }
+            //Console.WriteLine(name + " " + hookname);
         }
-
-        void Output(string strCreateFile)
+        public string getParam(int idx, INktHookCallInfo info)
         {
-            Console.Write(strCreateFile);
+            //WriteFile = hFile, lpBuffer, nNumberOfByteToWrite, lpNumberOfBytesWritten,lpOverlapped
+            //CreateFile = lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile
+            //DeleteFile = lpFileName
+            //CopyFile = lpExistingFileName, lpNewFIleName, bFailIfExists
+            //CopyFileEx = lpExistingFileName, lpNewFileName, lpProgressROutinem lpData, pbCancel, dwCopyFlags
+
+
+
+            string parameters = "";
+            //idx = 0 = WriteFile
+            //idx = 1 = CreateFile
+            //idx = 2 = DeleteFile
+            //idx = 3 = CopyFile
+            //idx = 4 = CopyFileEx
+            INktParamsEnum paramEnum = info.Params();
+            INktParam param = paramEnum.First();
+
+
+
+            //while (param != null)
+            //{
+            //    //still thinking how to handle WriteFile call
+            //    //for now, just implements the other beside WriteFile
+            //    //the other call didn't have parameters other that WORD or LPCTSTR, so can be processed immediately
+            //    //also need to filter for createFile call, so only log truly creating file
+            //    parameters += param.ReadString();
+            //    param = paramEnum.Next();
+            //}
+            if (idx == 0) //WriteFile = hFile, lpBuffer, nNumberOfByteToWrite, lpNumberOfBytesWritten,lpOverlapped 
+            {
+                parameters = "WriteFile - ";
+                //for ()
+                //{
+
+                //}
+                //INktParam param = paramEnum.First();
+                //Microsoft.Win32.SafeHandles.SafeFileHandle handle = new Microsoft.Win32.SafeHandles.SafeFileHandle(param.PointerVal,true);
+                //handle.
+            }
+            else if (idx == 1)
+            //CreateFile = lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile
+            //need to filter whether the call is to CREATEFILE or just to show files in a window
+            //both of them using the same call to make it happen
+            //still thinking a way to not include the call for showing items in a window as it will hit overall performance
+            {
+                parameters = "CreateFile - ";
+
+                //lpFileName
+                parameters += param.ReadString() + "\", ";
+
+                //dwDesiredAccess
+                //seems dwDesiredAccess is the one to filter
+                //not this one, so the one to filter is the creationDisposition
+                param = paramEnum.Next();
+                if ((param.LongVal & 0x80000000) == 0x80000000)
+                    parameters += "GENERIC_READ ";
+                else if ((param.LongVal & 0x40000000) == 0x40000000)
+                    parameters += "GENERIC_WRITE ";
+                else if ((param.LongVal & 0x20000000) == 0x20000000)
+                    parameters += "GENERIC_EXECUTE ";
+                else if ((param.LongVal & 0x10000000) == 0x10000000)
+                    parameters += "GENERIC_ALL ";
+                else
+                    parameters += "0";
+                parameters += ", ";
+
+                //dwShareMode
+                param = paramEnum.Next();
+                if ((param.LongVal & 0x00000001) == 0x00000001)
+                    parameters += "FILE_SHARE_READ ";
+                else if ((param.LongVal & 0x00000002) == 0x00000002)
+                    parameters += "FILE_SHARE_WRITE ";
+                else if ((param.LongVal & 0x00000004) == 0x00000004)
+                    parameters += "FILE_SHARE_DELETE ";
+                else
+                    parameters += "0";
+                parameters += ", ";
+
+                //lpSecurityAttributes
+                param = paramEnum.Next();
+                if (param.PointerVal != IntPtr.Zero)
+                {
+                    parameters += "SECURITY_ATTRIBUTES(";
+
+                    INktParamsEnum paramsEnumStruct = param.Evaluate().Fields();
+                    INktParam paramStruct = paramsEnumStruct.First();
+
+                    parameters += paramStruct.LongVal.ToString();
+                    parameters += ", ";
+
+                    paramStruct = paramsEnumStruct.Next();
+                    parameters += paramStruct.PointerVal.ToString();
+                    parameters += ", ";
+
+                    paramStruct = paramsEnumStruct.Next();
+                    parameters += paramStruct.LongVal.ToString();
+                    parameters += ")";
+                }
+                else
+                    parameters += "0";
+                parameters += ", ";
+
+                //dwCreationDisposition
+                //seems the flag of creating new file is CREATE_ALWAYS, as other only open, not creating
+                //CREATE_NEW only creating file but when the file exists, error shows up
+                //other than create_always, will throw null
+                param = paramEnum.Next();
+                //if (param.LongVal == 1)
+                //    parameters += "CREATE_NEW ";
+                //else 
+                if (param.LongVal == 2)
+                    parameters += "CREATE_ALWAYS ";
+                //else if (param.LongVal == 3)
+                //    parameters += "OPEN_EXISTING ";
+                //else if (param.LongVal == 4)
+                //    parameters += "OPEN_ALWAYS ";
+                //else if (param.LongVal == 5)
+                //    parameters += "TRUNCATE_EXISTING ";
+                else
+                    //parameters += "0";
+                    return parameters = null;
+                parameters += ", ";
+
+                //dwFlagsAndAttributes
+                parameters += param.LongVal;
+                parameters += ", ";
+
+                //hTemplateFile
+                parameters += param.LongLongVal;
+                parameters += ");\r\n";
+            }
+            else if (idx == 2) //DeleteFile = lpFileName
+            {
+                parameters = "DeleteFile - ";
+                parameters += param.ReadString();
+
+            }
+            else if (idx == 3 || idx == 4) //CopyFile = lpExistingFileName, lpNewFIleName, bFailIfExists 
+            {
+                parameters = "CopyFile - ";
+                parameters += "Old Folder - " + param.ReadString();
+                parameters += "New Folder - " + param.ReadString();
+            }   
+            //else if (idx == 4) //CopyFileEx = lpExistingFileName, lpNewFileName, lpProgressROutinem lpData, pbCancel, dwCopyFlags
+            //{
+
+            //}
+            return parameters;
         }
+
+        //void OnFunctionCalledOld(INktHook hook, INktProcess proc, INktHookCallInfo hookCallInfo)
+        //{
+        //    string parameters = "CreateFile(\"";
+
+        //    INktParamsEnum paramsEnum = hookCallInfo.Params();
+
+        //    //lpFileName
+        //    INktParam param = paramsEnum.First();
+        //    parameters += param.ReadString() + "\", ";
+
+        //    //dwDesiredAccess
+        //    param = paramsEnum.Next();
+        //    if ((param.LongVal & 0x80000000) == 0x80000000)
+        //        parameters += "GENERIC_READ ";
+        //    else if ((param.LongVal & 0x40000000) == 0x40000000)
+        //        parameters += "GENERIC_WRITE ";
+        //    else if ((param.LongVal & 0x20000000) == 0x20000000)
+        //        parameters += "GENERIC_EXECUTE ";
+        //    else if ((param.LongVal & 0x10000000) == 0x10000000)
+        //        parameters += "GENERIC_ALL ";
+        //    else
+        //        parameters += "0";
+        //    parameters += ", ";
+
+        //    //dwShareMode
+        //    param = paramsEnum.Next();
+        //    if ((param.LongVal & 0x00000001) == 0x00000001)
+        //        parameters += "FILE_SHARE_READ ";
+        //    else if ((param.LongVal & 0x00000002) == 0x00000002)
+        //        parameters += "FILE_SHARE_WRITE ";
+        //    else if ((param.LongVal & 0x00000004) == 0x00000004)
+        //        parameters += "FILE_SHARE_DELETE ";
+        //    else
+        //        parameters += "0";
+        //    parameters += ", ";
+
+        //    //lpSecurityAttributes
+        //    param = paramsEnum.Next();
+        //    if (param.PointerVal != IntPtr.Zero)
+        //    {
+        //        parameters += "SECURITY_ATTRIBUTES(";
+
+        //        INktParamsEnum paramsEnumStruct = param.Evaluate().Fields();
+        //        INktParam paramStruct = paramsEnumStruct.First();
+
+        //        parameters += paramStruct.LongVal.ToString();
+        //        parameters += ", ";
+
+        //        paramStruct = paramsEnumStruct.Next();
+        //        parameters += paramStruct.PointerVal.ToString();
+        //        parameters += ", ";
+
+        //        paramStruct = paramsEnumStruct.Next();
+        //        parameters += paramStruct.LongVal.ToString();
+        //        parameters += ")";
+        //    }
+        //    else
+        //        parameters += "0";
+        //    parameters += ", ";
+
+        //    //dwCreationDisposition
+        //    param = paramsEnum.Next();
+        //    if (param.LongVal == 1)
+        //        parameters += "CREATE_NEW ";
+        //    else if (param.LongVal == 2)
+        //        parameters += "CREATE_ALWAYS ";
+        //    else if (param.LongVal == 3)
+        //        parameters += "OPEN_EXISTING ";
+        //    else if (param.LongVal == 4)
+        //        parameters += "OPEN_ALWAYS ";
+        //    else if (param.LongVal == 5)
+        //        parameters += "TRUNCATE_EXISTING ";
+        //    else
+        //        parameters += "0";
+        //    parameters += ", ";
+
+        //    //dwFlagsAndAttributes
+        //    parameters += param.LongVal;
+        //    parameters += ", ";
+
+        //    //hTemplateFile
+        //    parameters += param.LongLongVal;
+        //    parameters += ");\r\n";
+        //    //Output(parameters);
+        //}
+
+        //void Output(string parameters)
+        //{
+        //    Console.Write(parameters);
+        //}
     }
 }

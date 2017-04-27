@@ -8,27 +8,30 @@ namespace Knob
 {
     class ProcessCall
     {
-        private string processName;
-        private int[] dllInjection;
-        private int[] iatHooking;
-        private int[] antiDebugging;
-        private int[] screenCapture;
-        private int dllSeverity;
-        private int iatSeverity;
-        private int antiDebugSeverity;
-        private int screencapSeverity;
-        private LinkedList<string> createFileLog;
-        private LinkedList<string> writeFileLog;
-        private LinkedList<string> deleteFileLog;
-        private bool alert;
+        string processName;
+        int pid;
+        int[] dllInjection;
+        int[] iatHooking;
+        int[] antiDebugging;
+        int[] screenCapture;
+        int dllSeverity;
+        int iatSeverity;
+        int antiDebugSeverity;
+        int screencapSeverity;
+        LinkedList<string> createFileLog;
+        LinkedList<string> writeFileLog;
+        LinkedList<string> deleteFileLog;
+        LinkedList<string> copyFileLog;
+        bool alert;
 
-        public ProcessCall(string processName)
+        public ProcessCall(string processName,int pid)
         {
             this.processName = processName;
+            this.pid = pid;
             dllInjection = new int[4];
-            iatHooking = new int[3];
+            iatHooking = new int[5];
             antiDebugging = new int[3];
-            screenCapture = new int[7];
+            screenCapture = new int[6];
             dllSeverity = 0;
             iatSeverity = 0;
             antiDebugSeverity = 0;
@@ -38,11 +41,15 @@ namespace Knob
             createFileLog = new LinkedList<string>();
             writeFileLog = new LinkedList<string>();
             deleteFileLog = new LinkedList<string>();
+            copyFileLog = new LinkedList<string>();
         }
-
+        public string getName()
+        {
+            return processName;
+        }
         public void setFlag(string type,int number)
         {
-            if (type.Equals("dll"))
+            if (type.Equals("dll", StringComparison.OrdinalIgnoreCase))
             {
                 if (dllInjection[number] == 0)
                 {
@@ -50,7 +57,7 @@ namespace Knob
                     dllSeverity++;
                 }
             }
-            else if (type.Equals("iat"))
+            else if (type.Equals("iat", StringComparison.OrdinalIgnoreCase))
             {
                 if (iatHooking[number] == 0)
                 {
@@ -58,7 +65,7 @@ namespace Knob
                     iatSeverity++;
                 }
             }
-            else if (type.Equals("anti"))
+            else if (type.Equals("anti", StringComparison.OrdinalIgnoreCase))
             {
                 if (antiDebugging[number] == 0)
                 {
@@ -66,7 +73,7 @@ namespace Knob
                     antiDebugSeverity++;
                 }
             }
-            else
+            else if (type.Equals("screencap", StringComparison.OrdinalIgnoreCase))
             {
                 if (screenCapture[number] == 0)
                 {
@@ -90,26 +97,12 @@ namespace Knob
         }
         public bool Alert
         {
-            get
-            {
-                return Alert;
-            }
+            get;
         }
 
-        public void setLog(string call, string directory)
+        public void setLog(int idx, string changes)
         {
-            if (call.Equals("CreateFile"))
-            {
-                createFileLog.AddLast(directory);
-            }
-            else if (call.Equals("DeleteFile"))
-            {
-                deleteFileLog.AddLast(directory);
-            }
-            else
-            {
-                writeFileLog.AddLast(directory);
-            }
+            
         }
     }
 }

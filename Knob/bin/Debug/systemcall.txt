@@ -16,8 +16,8 @@ kernel32.dll!CreateCompatibleDC
 kernel32.dll!CreateCompatibleBitmap
 kernel32.dll!SelectObject
 kernel32.dll!BitBlt
-kernel32.dll!WriteFile
-kernel32.dll!CreateFile
-kernel32.dll!DeleteFile
-kernel32.dll!CopyFile
-kernel32.dll!CopyFileEx
+kernel32.dll!WriteFileW
+kernel32.dll!CreateFileW
+kernel32.dll!DeleteFileW
+kernel32.dll!CopyFileW
+kernel32.dll!CopyFileExW
