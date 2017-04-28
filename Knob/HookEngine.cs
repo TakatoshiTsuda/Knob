@@ -127,12 +127,16 @@ namespace Knob
                 if (param != null)
                 {
                     Console.WriteLine(name + " " + param);
-                    pc.setLog(idx, param);
+                    pc.setLog(param);
                 } 
             }
             else
             {
                 pc.setFlag(type, idx);
+            }
+            if (pc.Alert==true)
+            {
+                Console.WriteLine(name);
             }
             //Console.WriteLine(name + " " + hookname);
         }
@@ -184,7 +188,11 @@ namespace Knob
             //still thinking a way to not include the call for showing items in a window as it will hit overall performance
             {
                 parameters = "CreateFile - ";
-
+                //param = paramEnum.GetAt(4);
+                //if (param.LongVal != 2)
+                //{
+                //    return null;
+                //}
                 //lpFileName
                 parameters += param.ReadString() + "\", ";
 
@@ -267,7 +275,7 @@ namespace Knob
 
                 //hTemplateFile
                 parameters += param.LongLongVal;
-                parameters += ");\r\n";
+                parameters += ");";
             }
             else if (idx == 2) //DeleteFile = lpFileName
             {
@@ -279,7 +287,8 @@ namespace Knob
             {
                 parameters = "CopyFile - ";
                 parameters += "Old Folder - " + param.ReadString();
-                parameters += "New Folder - " + param.ReadString();
+                param = paramEnum.Next();
+                parameters += " - New Folder - " + param.ReadString();
             }   
             //else if (idx == 4) //CopyFileEx = lpExistingFileName, lpNewFileName, lpProgressROutinem lpData, pbCancel, dwCopyFlags
             //{

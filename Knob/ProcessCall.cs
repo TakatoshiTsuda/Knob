@@ -18,10 +18,11 @@ namespace Knob
         int iatSeverity;
         int antiDebugSeverity;
         int screencapSeverity;
-        LinkedList<string> createFileLog;
-        LinkedList<string> writeFileLog;
-        LinkedList<string> deleteFileLog;
-        LinkedList<string> copyFileLog;
+        LinkedList<string> log;
+        //LinkedList<string> createFileLog;
+        //LinkedList<string> writeFileLog;
+        //LinkedList<string> deleteFileLog;
+        //LinkedList<string> copyFileLog;
         bool alert;
 
         public ProcessCall(string processName,int pid)
@@ -38,10 +39,11 @@ namespace Knob
             screencapSeverity = 0;
             alert = false;
 
-            createFileLog = new LinkedList<string>();
-            writeFileLog = new LinkedList<string>();
-            deleteFileLog = new LinkedList<string>();
-            copyFileLog = new LinkedList<string>();
+            log = new LinkedList<string>();
+            //createFileLog = new LinkedList<string>();
+            //writeFileLog = new LinkedList<string>();
+            //deleteFileLog = new LinkedList<string>();
+            //copyFileLog = new LinkedList<string>();
         }
         public string getName()
         {
@@ -100,9 +102,9 @@ namespace Knob
             get;
         }
 
-        public void setLog(int idx, string changes)
+        public void setLog(string changes)
         {
-            
+            log.AddLast(changes);
         }
     }
 }
