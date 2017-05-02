@@ -85,6 +85,12 @@ namespace Knob
                 
             }
         }
+        public void killProcess(ProcessCall proc)
+        {
+            Process temp = Process.GetProcessById(proc.Pid);
+            temp.Kill();
+            Console.WriteLine("Killed a Process -" + proc.ProcessName );
+        }
         public void addException(string name)
         {
             System.IO.StreamWriter file = null;
@@ -123,10 +129,6 @@ namespace Knob
                 Console.WriteLine("Filtering" + proc.Name);
                 filterProcess(proc);
             }         
-        }
-        public void killProc()
-        {
-
         }
         void processStopEvent_EventArrived(object sender, EventArrivedEventArgs e)
         {

@@ -45,10 +45,6 @@ namespace Knob
             //deleteFileLog = new LinkedList<string>();
             //copyFileLog = new LinkedList<string>();
         }
-        public void returnTime()
-        {
-
-        }
         public string ProcessName
         {
             get
@@ -105,15 +101,12 @@ namespace Knob
             if (iatSeverity == 2 || dllSeverity == 2 || screencapSeverity == 2)
             {
                 alert = true;
+                GlobalManager.procEngine.killProcess(this);
             }
-            else if (antiDebugSeverity >=1 )
-            {
-                alert = true;
-            }
-        }
-        public void checkProcess()
-        {
-
+            //else if (antiDebugSeverity >=1 )
+            //{
+            //    alert = true;
+            //}
         }
         public bool Alert
         {
