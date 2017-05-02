@@ -9,7 +9,6 @@ namespace Knob
 {
     class Program
     {
-        
         [MTAThread]
         static void Main(string[] args)
         {
@@ -17,8 +16,6 @@ namespace Knob
             string dll = (System.IO.Path.GetFullPath("DeviareCOM64.dll"));
             dllreg.Register_Dlls(dll);
             GlobalManager gm = new GlobalManager(); 
-            HookEngine he = new HookEngine();
-            ProcessEngine pe = new ProcessEngine();
             //he.SetHook();
             Boolean temp = true;
             while (temp != false)

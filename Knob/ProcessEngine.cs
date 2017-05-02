@@ -85,6 +85,14 @@ namespace Knob
                 
             }
         }
+        public void addException(string name)
+        {
+            System.IO.StreamWriter file = null;
+            file = new System.IO.StreamWriter(dir + "/exception.txt", true);
+            file.WriteLine(name);
+            Console.WriteLine("Added to Exception List! "+ name);
+            file.Close();
+        }
         NktProcess GetProcess(string proccessName)
         {
             NktProcessesEnum enumProcess = GlobalManager.spyMgr.Processes();
@@ -116,7 +124,10 @@ namespace Knob
                 filterProcess(proc);
             }         
         }
+        public void killProc()
+        {
 
+        }
         void processStopEvent_EventArrived(object sender, EventArrivedEventArgs e)
         {
             int pid = Int32.Parse(e.NewEvent.Properties["ProcessID"].Value.ToString());

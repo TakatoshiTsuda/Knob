@@ -122,3 +122,6 @@ msvsmon.exe
 Knob.exe
 conhost.exe
 LocationNotificationWindows.exe
+notepad++.exe
+nvtray.exe
+nvtray.exe

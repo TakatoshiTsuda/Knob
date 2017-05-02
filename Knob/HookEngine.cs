@@ -70,7 +70,6 @@ namespace Knob
             hook.OnFunctionCalled += OnFunctionCalled;
             hooks.Add(hook);
         }
-
         public void setHook(NktProcess process)
         {
             hooks.Attach(process, true);
@@ -140,6 +139,20 @@ namespace Knob
             }
             //Console.WriteLine(name + " " + hookname);
         }
+        //private NktProcess GetProcess(int pid)
+        //{
+        //    NktProcessesEnum enumProcess = GlobalManager.spyMgr.Processes();
+        //    NktProcess tempProcess = enumProcess.First();
+        //    while (tempProcess != null)
+        //    {
+        //        if (tempProcess.Id == pid)
+        //        {
+        //            return tempProcess;
+        //        }
+        //        tempProcess = enumProcess.Next();
+        //    }
+        //    return null;
+        //}
         public string getParam(int idx, INktHookCallInfo info)
         {
             //WriteFile = hFile, lpBuffer, nNumberOfByteToWrite, lpNumberOfBytesWritten,lpOverlapped
@@ -147,9 +160,7 @@ namespace Knob
             //DeleteFile = lpFileName
             //CopyFile = lpExistingFileName, lpNewFIleName, bFailIfExists
             //CopyFileEx = lpExistingFileName, lpNewFileName, lpProgressROutinem lpData, pbCancel, dwCopyFlags
-
-
-
+           
             string parameters = "";
             //idx = 0 = WriteFile
             //idx = 1 = CreateFile
@@ -158,9 +169,7 @@ namespace Knob
             //idx = 4 = CopyFileEx
             INktParamsEnum paramEnum = info.Params();
             INktParam param = paramEnum.First();
-
-
-
+            
             //while (param != null)
             //{
             //    //still thinking how to handle WriteFile call

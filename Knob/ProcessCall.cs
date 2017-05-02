@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Knob
 {
-    class ProcessCall
+    public class ProcessCall
     {
         string processName;
         int pid;
@@ -18,6 +18,7 @@ namespace Knob
         int iatSeverity;
         int antiDebugSeverity;
         int screencapSeverity;
+        
         LinkedList<string> log;
         //LinkedList<string> createFileLog;
         //LinkedList<string> writeFileLog;
@@ -38,16 +39,29 @@ namespace Knob
             antiDebugSeverity = 0;
             screencapSeverity = 0;
             alert = false;
-
             log = new LinkedList<string>();
             //createFileLog = new LinkedList<string>();
             //writeFileLog = new LinkedList<string>();
             //deleteFileLog = new LinkedList<string>();
             //copyFileLog = new LinkedList<string>();
         }
-        public string getName()
+        public void returnTime()
         {
-            return processName;
+
+        }
+        public string ProcessName
+        {
+            get
+            {
+                return processName;
+            }
+        }
+        public int Pid
+        {
+            get
+            {
+                return pid;
+            }
         }
         public void setFlag(string type,int number)
         {
@@ -96,6 +110,10 @@ namespace Knob
             {
                 alert = true;
             }
+        }
+        public void checkProcess()
+        {
+
         }
         public bool Alert
         {
